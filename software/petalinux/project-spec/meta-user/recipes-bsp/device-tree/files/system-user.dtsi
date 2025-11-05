@@ -1,0 +1,241 @@
+/*
+ * Device tree modifications for YOLOv3 on PYNQ-Z2
+ * Additions for USB webcam, HDMI output, and DPU support
+ */
+
+/include/ "system-conf.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/phy/phy.h>
+
+/* USB configuration for webcam support */
+&usb0 {
+    status = "okay";
+    dr_mode = "host";
+    phy_type = "ulpi";
+};
+
+/* I2C configuration for camera sensors */
+&i2c0 {
+    status = "okay";
+    clock-frequency = <400000>;
+
+    /* Example: Add camera sensor if needed */
+    /*
+    camera@21 {
+        compatible = "ovti,ov5640";
+        reg = <0x21>;
+        clocks = <&clkc 15>;
+        clock-names = "xclk";
+        reset-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+
+        port {
+            camera_out: endpoint {
+                remote-endpoint = <&csi_in>;
+            };
+        };
+    };
+    */
+};
+
+/* HDMI output configuration */
+&axi_hdmi_0 {
+    status = "okay";
+};
+
+/* DPU memory reservation for YOLOv3 model */
+/ {
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        dpu_reserved: dpu@4f000000 {
+            no-map;
+            reg = <0x4f000000 0x01000000>; /* 16MB reserved for DPU */
+        };
+
+        video_buffers: video@50000000 {
+            no-map;
+            reg = <0x50000000 0x08000000>; /* 128MB for video buffers */
+        };
+    };
+
+    /* Add DPU device */
+    dpu: dpu@43c00000 {
+        compatible = "xlnx,dpu";
+        reg = <0x43c00000 0x10000>;
+        interrupt-parent = <&intc>;
+        interrupts = <0 29 4>;
+        clocks = <&clkc 15>, <&clkc 16>;
+        clock-names = "dpu_clk", "dpu_dsp_clk";
+        memory-region = <&dpu_reserved>;
+        status = "okay";
+    };
+
+    /* Add custom LEDs for status indication */
+    leds {
+        compatible = "gpio-leds";
+
+        dpu_status_led {
+            label = "dpu_status";
+            gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+            default-state = "off";
+        };
+
+        camera_status_led {
+            label = "camera_status";
+            gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+            default-state = "off";
+        };
+
+        inference_status_led {
+            label = "inference_status";
+            gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+            default-state = "off";
+        };
+    };
+
+    /* Add buttons for user interaction */
+    keys {
+        compatible = "gpio-keys";
+
+        button_reset {
+            label = "reset_button";
+            gpios = <&gpio0 50 GPIO_ACTIVE_LOW>;
+            linux,code = <KEY_RESTART>;
+        };
+
+        button_mode {
+            label = "mode_button";
+            gpios = <&gpio0 51 GPIO_ACTIVE_LOW>;
+            linux,code = <KEY_MODE>;
+        };
+    };
+};
+
+/* Ethernet configuration for network access */
+&gem0 {
+    status = "okay";
+    phy-mode = "rgmii-id";
+    phy-handle = <&ethernet_phy>;
+    ethernet_phy: ethernet-phy@0 {
+        reg = <0>;
+        device_type = "ethernet-phy";
+    };
+};
+
+/* SD card configuration */
+&sdhci0 {
+    status = "okay";
+    bus-width = <4>;
+    max-frequency = <50000000>;
+    no-1-8-v;
+    disable-wp;
+};
+
+/* UART configuration for debugging */
+&uart1 {
+    status = "okay";
+};
+
+/* GPIO configuration */
+&gpio0 {
+    status = "okay";
+    gpio-line-names = "dpu_status_led", "camera_status_led", "inference_status_led",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                      "", "", "", "", "", "", "", "", "", "", "", "", "", "reset_button", "mode_button";
+};
+
+/* Clock configuration */
+&clkc {
+    fclk-enable = <0xf>;
+    clock-frequency = <100000000>;
+};
+
+/* DMA configuration for video processing */
+&axi_dma_0 {
+    status = "okay";
+};
+
+/* SPI configuration for potential camera interfaces */
+&qspi {
+    status = "okay";
+    is-dual = <0>;
+    num-cs = <1>;
+    flash@0 {
+        compatible = "n25q128a11";
+        reg = <0x0>;
+        spi-tx-bus-width = <1>;
+        spi-rx-bus-width = <4>;
+        spi-max-frequency = <50000000>;
+    };
+};
+
+/* Disable unused peripherals to save resources */
+&can0 {
+    status = "disabled";
+};
+
+&i2c1 {
+    status = "disabled";
+};
+
+&spi0 {
+    status = "disabled";
+};
+
+&spi1 {
+    status = "disabled";
+};
+
+&ttc0 {
+    status = "okay";
+};
+
+&watchdog0 {
+    status = "okay";
+    timeout-sec = <10>;
+};
+
+/* Add thermal zones for monitoring */
+thermal-zones {
+    cpu_thermal: cpu-thermal {
+        polling-delay-passive = <250>;
+        polling-delay = <1000>;
+
+        thermal-sensors = <&cpu_temp_sensor 0>;
+
+        trips {
+            cpu_alert0: cpu-alert0 {
+                temperature = <70000>; /* 70°C */
+                hysteresis = <2000>;
+                type = "passive";
+            };
+
+            cpu_crit: cpu-crit {
+                temperature = <85000>; /* 85°C */
+                hysteresis = <2000>;
+                type = "critical";
+            };
+        };
+
+        cooling-maps {
+            map0 {
+                trip = <&cpu_alert0>;
+                cooling-device = <&CPU0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+            };
+        };
+    };
+};
+
+/* Add CPU temperature sensor */
+cpu_temp_sensor: cpu-temp {
+    compatible = "xilinx,zynqmp-thermal";
+    #thermal-sensor-cells = <1>;
+};

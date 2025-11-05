@@ -1,0 +1,195 @@
+# PetaLinux rootfs configuration for YOLOv3 on PYNQ-Z2
+
+# Base configuration
+CONFIG_core-image-minimal=y
+CONFIG_IMAGE_INSTALL_append=" \
+    packagegroup-core-ssh-openssh \
+    packagegroup-core-boot \
+"
+
+# Development tools
+CONFIG_packagegroup-core-buildessential=y
+CONFIG_devtool=y
+CONFIG_packagegroup-core-sdk=y
+
+# Python support
+CONFIG_packagegroup-python3=y
+CONFIG_python3=y
+CONFIG_python3-pip=y
+CONFIG_python3-setuptools=y
+CONFIG_python3-wheel=y
+CONFIG_python3-numpy=y
+CONFIG_python3-opencv=y
+CONFIG_python3-pynq=y
+
+# Essential Python packages for YOLOv3
+CONFIG_python3-pyyaml=y
+CONFIG_python3-pillow=y
+CONFIG_python3-psutil=y
+CONFIG_python3-scipy=y
+
+# Video and multimedia support
+CONFIG_v4l-utils=y
+CONFIG_usbutils=y
+CONFIG_mplayer=y
+CONFIG_ffmpeg=y
+CONFIG_gstreamer=y
+CONFIG_gstreamer1.0=y
+CONFIG_gstreamer1.0-plugins-base=y
+CONFIG_gstreamer1.0-plugins-good=y
+CONFIG_gstreamer1.0-plugins-bad=y
+CONFIG_gstreamer1.0-plugins-ugly=y
+CONFIG_gstreamer1.0-libav=y
+
+# Networking tools
+CONFIG_nfs-utils=y
+CONFIG_openssh-sftp-server=y
+CONFIG_wpa-supplicant=y
+CONFIG_wireless-tools=y
+CONFIG_wget=y
+CONFIG_curl=y
+CONFIG_net-tools=y
+CONFIG_iputils=y
+CONFIG_ethtool=y
+
+# System utilities
+CONFIG_htop=y
+CONFIG_procps=y
+CONFIG_coreutils=y
+CONFIG_findutils=y
+CONFIG_grep=y
+CONFIG_sed=y
+CONFIG_awk=y
+CONFIG_tar=y
+CONFIG_zip=y
+CONFIG_unzip=y
+
+# Debugging tools
+CONFIG_gdb=y
+CONFIG_strace=y
+CONFIG_ltrace=y
+CONFIG_valgrind=y
+CONFIG_perf=y
+
+# File system support
+CONFIG_dosfstools=y
+CONFIG_e2fsprogs=y
+CONFIG_ntfs-3g=y
+CONFIG_exfat-utils=y
+CONFIG_fuse=y
+CONFIG_sshfs-fuse=y
+
+# Hardware monitoring
+CONFIG_lm-sensors=y
+CONFIG_hddtemp=y
+CONFIG_smartmontools=y
+
+# System monitoring
+CONFIG_sysstat=y
+CONFIG_iotop=y
+CONFIG_nethogs=y
+
+# Compression tools
+CONFIG_gzip=y
+CONFIG_bzip2=y
+CONFIG_xz=y
+CONFIG_lzop=y
+
+# Text editors
+CONFIG_vim=y
+CONFIG_nano=y
+CONFIG_emacs=y
+
+# System management
+CONFIG_systemd=y
+CONFIG_systemd-analyze=y
+CONFIG_systemd-coredump=y
+CONFIG_systemd-journal-gateway=y
+
+# X11 support (for potential GUI applications)
+CONFIG_packagegroup-xfce-base=y
+CONFIG_xorg-y
+CONFIG_xorg-x11-server-y
+CONFIG_xorg-x11-xinit-y
+CONFIG_xorg-x11-xfs-y
+
+# Browser (optional)
+CONFIG_mozilla-firefox=y
+
+# Documentation
+CONFIG_man=y
+CONFIG_man-pages=y
+CONFIG_info=y
+CONFIG_docbook-xml=y
+CONFIG_docbook-xsl=y
+
+# Libraries for development
+CONFIG_zlib=y
+CONFIG_libglib2=y
+CONFIG_libxml2=y
+CONFIG_libxslt=y
+CONFIG_openssl=y
+CONFIG_libcrypto=y
+CONFIG_libssl=y
+CONFIG_libffi=y
+CONFIG_libreadline=y
+CONFIG_ncurses=y
+CONFIG_ncurses-lib=y
+
+# Image processing libraries
+CONFIG_libpng=y
+CONFIG_libjpeg-turbo=y
+CONFIG_libtiff=y
+CONFIG_libwebp=y
+
+# Video processing libraries
+CONFIG_libav=y
+CONFIG_libavcodec=y
+CONFIG_libavformat=y
+CONFIG_libavutil=y
+CONFIG_libswscale=y
+CONFIG_libswresample=y
+
+# Machine learning libraries (optional)
+CONFIG_tensorflow-lite=y
+CONFIG_pytorch=y
+
+# PYNQ specific packages
+CONFIG_pynq=y
+CONFIG_pynq-overlays=y
+CONFIG_pynq-video=y
+
+# DPU runtime libraries
+CONFIG_dpu-runtime=y
+CONFIG_vart=y
+CONFIG_target-firmware=y
+
+# Boot configuration
+CONFIG_bootconfig=y
+CONFIG_u-boot-y
+CONFIG_u-boot-tools=y
+
+# Kernel modules
+CONFIG_kernel-modules=y
+CONFIG_module-init-tools=y
+CONFIG_kmod=y
+
+# Custom application space
+CONFIG_EXTRA_USERS_CONFIG="
+    useradd -p '' yolo;
+    usermod -a -G audio,video,dialout,plugdev,users yolo;
+"
+
+# System services
+CONFIG_ssh-dropbear=y
+CONFIG_busybox-syslog=y
+CONFIG_logrotate=y
+
+# Package management
+CONFIG_opkg=y
+CONFIG_opkg-utils=y
+
+# System settings
+CONFIG_timezone="UTC"
+CONFIG_locale="en_US.UTF-8"
+CONFIG_keymap="us"
