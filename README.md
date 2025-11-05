@@ -81,7 +81,7 @@ This project provides a complete, production-ready YOLOv3 implementation that ac
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-username/yolo-pynq.git
+git clone https://github.com/TH3SOLO1ST/yolo-pynq.git
 cd yolo-pynq
 ```
 
